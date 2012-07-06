@@ -1,0 +1,7 @@
+Tweetnet is a django application for creating networks from twitter data.
+
+Not a whole lot else to say here at the moment.
+
+To install, pull the application from github, then place it in a working django site and add it as a new application in settings.py.
+
+From the django-enabled python shell (python manage.py shell), enter "import <site>.tweetnet" to pull in the tweetnet context. 
