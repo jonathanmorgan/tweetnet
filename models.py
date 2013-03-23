@@ -20,7 +20,7 @@ class Tweet( models.Model ):
     tweet_text_length = models.IntegerField( null = True, blank = True )
 
     # user information
-    twitter_user = models.ForeignKey( 'Twitter_User', null = True, blank = True )
+    twitter_user = models.ForeignKey( 'Twitter_User', null = True, blank = True, related_name = 'author_user' )
     twitter_user_twitter_id = models.BigIntegerField()
     twitter_user_screenname = models.CharField( max_length = 255 )
     user_follower_count = models.IntegerField( null = True, blank = True )
@@ -31,7 +31,7 @@ class Tweet( models.Model ):
 
     # rewteets
     tweet_retweet_count = models.IntegerField( null = True, blank = True )
-    tweet_retweet_user = models.ForeignKey( 'Twitter_User', null = True, blank = True )
+    tweet_retweet_user = models.ForeignKey( 'Twitter_User', null = True, blank = True, related_name = 'retweet_user' )
     tweet_retweet_user_twitter_id = models.BigIntegerField( null = True, blank = True )
     tweet_retweet_id = models.BigIntegerField( null = True, blank = True )
 
