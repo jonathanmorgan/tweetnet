@@ -1,6 +1,8 @@
 from django.db import models
 
-class Abstract_Tweet( models.Model ):
+# not abstract for now.
+# class Abstract_Tweet( models.Model ):
+class Tweet( models.Model ):
 
     # timestamp
     tweet_timestamp = models.CharField( max_length = 255, blank = True )
@@ -18,7 +20,7 @@ class Abstract_Tweet( models.Model ):
     tweet_text_length = models.IntegerField( null = True, blank = True )
 
     # user information
-    twitter_user = models.ForeignKey( 'Abstract_Twitter_User', null = True, blank = True )
+    twitter_user = models.ForeignKey( 'Twitter_User', null = True, blank = True )
     twitter_user_twitter_id = models.BigIntegerField()
     twitter_user_screenname = models.CharField( max_length = 255 )
     user_follower_count = models.IntegerField( null = True, blank = True )
@@ -29,7 +31,7 @@ class Abstract_Tweet( models.Model ):
 
     # rewteets
     tweet_retweet_count = models.IntegerField( null = True, blank = True )
-    tweet_retweet_user = models.ForeignKey( 'Abstract_Twitter_User', null = True, blank = True )
+    tweet_retweet_user = models.ForeignKey( 'Twitter_User', null = True, blank = True )
     tweet_retweet_user_twitter_id = models.BigIntegerField( null = True, blank = True )
     tweet_retweet_id = models.BigIntegerField( null = True, blank = True )
 
@@ -58,9 +60,10 @@ class Abstract_Tweet( models.Model ):
     # meta
     #----------------------------------------------------------------------
 
+    # not abstract for now.
     # meta class so we know this is an abstract class.
-    class Meta:
-        abstract = True
+    #class Meta:
+    #    abstract = True
 
 
     #----------------------------------------------------------------------
@@ -107,10 +110,13 @@ class Abstract_Tweet( models.Model ):
 
     #-- END method __unicode__() --#
 
+#-- END class Tweet --#
 #-- END class Abstract_Tweet --#
 
 
-class Abstract_Twitter_User( models.Model ):
+# not abstract for now.
+# class Abstract_Twitter_User( models.Model ):
+class Twitter_User( models.Model ):
 
     twitter_user_name = models.CharField( max_length = 255, blank=True )
     twitter_user_twitter_id = models.BigIntegerField()
@@ -120,9 +126,10 @@ class Abstract_Twitter_User( models.Model ):
     # meta
     #----------------------------------------------------------------------
 
+    # not abstract for now.
     # meta class so we know this is an abstract class.
-    class Meta:
-        abstract = True
+    #class Meta:
+    #    abstract = True
 
 
     #----------------------------------------------------------------------
@@ -151,24 +158,4 @@ class Abstract_Twitter_User( models.Model ):
 
     #-- END method __unicode__() --#
 
-#-- END class Abstract_Twitter_User --#
-
-
-class Tweet( Abstract_Tweet ):
-    
-    '''
-    This is a basic implementation of Abstract_Tweet.  Nothing fancy, just the
-       base fields.
-    '''
-
-#-- END class Tweet ---#
-
-
-class Twitter_User( Abstract_Twitter_User ):
-    
-    '''
-    This is a basic implementation of Abstract_Twitter_User.  Nothing fancy,
-       just the base fields.
-    '''
-
-#-- END class Twitter_User ---#
+#-- END class Twitter_User --#
