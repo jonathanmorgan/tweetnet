@@ -5,7 +5,7 @@ from django.db import models
 class Tweet( models.Model ):
 
     # timestamp
-    tweet_timestamp = models.CharField( max_length = 255, blank = True )
+    tweet_timestamp = models.CharField( max_length = 255, null = True, blank = True )
     tweet_timestamp_datetime = models.DateTimeField( null = True, blank = True )
     timestamp_year = models.IntegerField( null = True, blank = True )
     timestamp_month = models.IntegerField( null = True, blank = True )
@@ -18,6 +18,7 @@ class Tweet( models.Model ):
     twitter_tweet_id = models.BigIntegerField()
     tweet_text = models.TextField( null = True, blank = True )
     tweet_text_length = models.IntegerField( null = True, blank = True )
+    tweet_language = models.CharField( max_length = 255, null = True, blank = True )
 
     # user information
     twitter_user = models.ForeignKey( 'Twitter_User', null = True, blank = True, related_name = 'author_user' )
@@ -38,6 +39,7 @@ class Tweet( models.Model ):
     # location
     tweet_location = models.TextField( null = True, blank = True )
     tweet_has_location = models.IntegerField( null = True, blank = True )
+    tweet_coordinates = models.CharField( max_length = 255, blank = True, null = True )
     tweet_latitude = models.CharField( max_length = 255, blank = True, null = True )
     tweet_longitude = models.CharField( max_length = 255, blank = True, null = True )
     
