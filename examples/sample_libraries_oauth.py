@@ -1,8 +1,8 @@
 # set up OAuth stuff.
-CONSUMER_KEY = '<your_application_consumer_key>'
-CONSUMER_SECRET = '<your_application_consumer_secret>'
-ACCESS_KEY = '<your_user_application_access_key>'
-ACCESS_SECRET = '<your_user_application_access_secret>'
+CONSUMER_KEY = ''
+CONSUMER_SECRET = ''
+ACCESS_KEY = ''
+ACCESS_SECRET = ''
 
 #===============================================================================
 # Trying twitter library used in O'Reilly books (not working great so far).
