@@ -10,27 +10,49 @@ Not a whole lot else to say here at the moment until I start integrating code to
 
 ## Dependencies
 
-None, so far.
+Depends no "twitter" tweet collection package, and on my python_utilities github repository [https://github.com/jonathanmorgan/python_utilities](https://github.com/jonathanmorgan/python_utilities).
+
+Also depends on Django 1.7 or greater.  Old South-based migrations are in the `/south_migrations folder`, but they are not going to be updated going forward.
 
 ## Installation
 
-## Installation
+### Python packages
 
 - install pip
 
         (sudo) easy_install pip
 
+- install ipython
+
+        (sudo) pip install ipython
+
+- install six
+
+        (sudo) pip install six
+
+- install pytz
+
+        (sudo) pip install pytz
+
 - install django
 
         (sudo) pip install django
 
-- install South (data migration tool), if it isn't already installed.
-
-        (sudo) pip install South
-
 - install the twitter python library
 
         (sudo) pip install twitter
+
+- if using postgresql, install postgresql database driver (psycopg2)
+
+        (sudo) pip install psycopg2
+        
+- if using mysql, install mysql database driver (MySQL-python)
+
+        (sudo) pip install MySQL-python
+        
+    or you can install it using your OS's package manager (sometimes easier to get it to compile).
+
+### Django setup
 
 - in your work directory, create a django site.
 
@@ -48,17 +70,71 @@ None, so far.
 
         git clone https://github.com/jonathanmorgan/tweetnet.git
     
-### Configure
+### Django Configuration
 
 - from the site\_directory, cd into the site configuration directory, where settings.py is located (it is named the same as site\_directory, but nested inside site\_directory, alongside all the other django code you pulled in from git - <site\_directory>/<same\_name\_as\_site\_directory>).
 
         cd <same_name_as_site_directory>
 
-- in settings.py, set USE_TZ to false to turn off time zone support:
+- if you want to use logging, in settings.py, configure logging near the top of the file:
 
-        USE_TZ = False
+        import logging
+        
+        logging.basicConfig(
+            level = logging.DEBUG,
+            #level = logging.INFO,
+            format = '%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+            filename = '<log_file_path>',
+            filemode = 'w'
+        )
 
 - configure the database in settings.py
+
+    - For postgresql (recommended becuase of unicode support):
+
+        - create postgresql database.
+        - create user to interact with postgresql database.  Set permissions so user has all permissions to your database.
+        - In settings.py, in the DATABASES structure:
+            - set the ENGINE to "django.db.backends.postgresql_psycopg2"
+            - set the database NAME, USER, and PASSWORD.
+            - If the database is not on localhost, enter a HOST.
+            - If the database is listening on a non-standard port, enter a PORT.
+        - Example:
+
+                DATABASES = {
+                    'default': {
+                        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+                        'NAME': 'tweetnet',                      # Or path to database file if using sqlite3.
+                        # The following settings are not used with sqlite3:
+                        'USER': 'django_user',
+                        'PASSWORD': '<pgsql_password>',
+                        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+                        'PORT': '',                      # Set to empty string for default (5432).
+                    }
+                }
+
+    - For sqlite3:
+
+        - figure out what file you want to hold the database.  For the initial implementation, we used reddit.sqlite in same directory as code (/home/socs/socs_reddit/reddit_collect/reddit.sqlite).
+        - In settings.py, in the DATABASES structure:
+            - set the ENGINE to "django.db.backends.sqlite3"
+            - set the database NAME (path to file), USER and PASSWORD if you set one on the database.
+            - If the database is not on localhost, enter a HOST.
+            - If the database is listening on a non-standard port, enter a PORT.
+        - Example:
+
+                DATABASES = {
+                    'default': {
+                        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+                        'NAME': '/home/socs/socs_reddit/reddit_collect/reddit.sqlite',                      # Or path to database file if using sqlite3.
+                        # The following settings are not used with sqlite3:
+                        'USER': '',
+                        'PASSWORD': '',
+                        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+                        'PORT': '',                      # Set to empty string for default.
+                    }
+                }
+
 
     - For mysql:
 
@@ -88,47 +164,6 @@ None, so far.
                     }
                 }
 
-    - For sqlite3:
-
-        - figure out what file you want to hold the database.  For the initial implementation, we used reddit.sqlite in same directory as code (/home/socs/socs_reddit/reddit_collect/reddit.sqlite).
-        - In settings.py, in the DATABASES structure:
-            - set the ENGINE to "django.db.backends.sqlite3"
-            - set the database NAME (path to file), USER and PASSWORD if you set one on the database.
-            - If the database is not on localhost, enter a HOST.
-            - If the database is listening on a non-standard port, enter a PORT.
-        - Example:
-
-                DATABASES = {
-                    'default': {
-                        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-                        'NAME': '/home/socs/socs_reddit/reddit_collect/reddit.sqlite',                      # Or path to database file if using sqlite3.
-                        # The following settings are not used with sqlite3:
-                        'USER': '',
-                        'PASSWORD': '',
-                        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-                        'PORT': '',                      # Set to empty string for default.
-                    }
-                }
-
-
-- in settings.py, add 'south' to the INSTALLED\_APPS list.  Example:
-    
-        INSTALLED_APPS = (
-            'django.contrib.auth',
-            'django.contrib.contenttypes',
-            'django.contrib.sessions',
-            'django.contrib.sites',
-            'django.contrib.messages',
-            'django.contrib.staticfiles',
-            # Uncomment the next line to enable the admin:
-            # 'django.contrib.admin',
-            # Uncomment the next line to enable admin documentation:
-            # 'django.contrib.admindocs',
-            'south',
-        )
-
-- Once database is configured in settings.py, in your site directory, run "python manage.py syncdb" to create database tables.
-
 - in settings.py, add 'tweetnet' to the INSTALLED\_APPS list.  Example:
     
         INSTALLED_APPS = (
@@ -142,11 +177,10 @@ None, so far.
             # 'django.contrib.admin',
             # Uncomment the next line to enable admin documentation:
             # 'django.contrib.admindocs',
-            'south',
             'tweetnet',
         )
 
-- run `python manage.py migrate tweetnet`.
+- Once database is configured in settings.py, in your site directory, run "python manage.py migrate" to create database tables.
 
 ## Usage
 
@@ -188,3 +222,7 @@ If you don't use manage.py to open a shell (or if you are making a shell script 
     # set DJANGO_SETTINGS_MODULE environment variable = "<site_folder_name>.settings".
     import os
     os.environ[ 'DJANGO_SETTINGS_MODULE' ] = "<site_folder_name>.settings"
+
+# TODO
+
+- Add tables for hashtags, URLS.

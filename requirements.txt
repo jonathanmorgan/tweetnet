@@ -1,0 +1,5 @@
+ipython
+six
+pytz
+django
+twitter

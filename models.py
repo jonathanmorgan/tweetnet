@@ -22,7 +22,6 @@ from django.utils.encoding import python_2_unicode_compatible
 # Twitter variables
 TWITTER_DATE_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
-# not abstract for now.
 @python_2_unicode_compatible
 class Abstract_Twitter_User( models.Model ):
 
@@ -178,7 +177,94 @@ class Twitter_User( Abstract_Twitter_User ):
 
 #-- END class Twitter_User --#
 
-# not abstract for now.
+
+'''
+Sample tweet JSON - 2015-02-08
+{
+    "contributors": null,
+    "coordinates": null,
+    "created_at": "Sun Feb 08 17:19:39 +0000 2015",
+    "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "trends": [],
+        "urls": [
+            {
+                "display_url": "knzmuslim.com",
+                "expanded_url": "http://knzmuslim.com",
+                "indices": [
+                    72,
+                    94
+                ],
+                "url": "http://t.co/sfymYu8CVj"
+            }
+        ],
+        "user_mentions": []
+    },
+    "favorite_count": 0,
+    "favorited": false,
+    "filter_level": "low",
+    "geo": null,
+    "id": 564473647612841985,
+    "id_str": "564473647612841985",
+    "in_reply_to_screen_name": null,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "lang": "ar",
+    "place": null,
+    "possibly_sensitive": false,
+    "retweet_count": 0,
+    "retweeted": false,
+    "source": "<a href=\"http://knzmuslim.com\" rel=\"nofollow\">knzmuslim \u0643\u0646\u0632 \u0627\u0644\u0645\u0633\u0644\u0645</a>",
+    "text": "\u0627\u0644\u0644\u0647\u0645 \u0635\u0628\u062d\u0646\u0627 \u0628\u0645\u0627 \u064a\u0633\u0631\u0646\u0627 \u0648\u0643\u0641 \u0639\u0646\u0627 \u0645\u0627 \u064a\u0636\u0631\u0646\u0627 \u0648\u064a\u0633\u0631 \u0644\u0646\u0627 \u062f\u0631\u0648\u0628\u0646\u0627 \u0648\u0646\u0648\u0631 \u0628\u0646\u0648\u0631\u0643 \u064a\u0648\u0645\u0646\u0627 http://t.co/sfymYu8CVj",
+    "timestamp_ms": "1423415979661",
+    "truncated": false,
+    "user": {
+        "contributors_enabled": false,
+        "created_at": "Tue Aug 05 08:20:21 +0000 2014",
+        "default_profile": true,
+        "default_profile_image": false,
+        "description": "\u0635\u0646\u0627\u0639 \u0627\u0644\u062d\u064a\u0627\u0647",
+        "favourites_count": 0,
+        "follow_request_sent": null,
+        "followers_count": 24,
+        "following": null,
+        "friends_count": 37,
+        "geo_enabled": false,
+        "id": 2708736350,
+        "id_str": "2708736350",
+        "is_translator": false,
+        "lang": "ar",
+        "listed_count": 0,
+        "location": "",
+        "name": " \u0644\u064a\u0646\u0627 \u0627\u062d\u0645\u062f",
+        "notifications": null,
+        "profile_background_color": "C0DEED",
+        "profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+        "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+        "profile_background_tile": false,
+        "profile_image_url": "http://pbs.twimg.com/profile_images/496571979177017345/bSFdCKPp_normal.jpeg",
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/496571979177017345/bSFdCKPp_normal.jpeg",
+        "profile_link_color": "0084B4",
+        "profile_sidebar_border_color": "C0DEED",
+        "profile_sidebar_fill_color": "DDEEF6",
+        "profile_text_color": "333333",
+        "profile_use_background_image": true,
+        "protected": false,
+        "screen_name": "linaa_hmad",
+        "statuses_count": 7045,
+        "time_zone": null,
+        "url": null,
+        "utc_offset": null,
+        "verified": false
+    }
+}
+
+''' 
+
+
 @python_2_unicode_compatible
 class Abstract_Tweet( models.Model ):
 
@@ -204,6 +290,7 @@ class Abstract_Tweet( models.Model ):
     timestamp_hour = models.IntegerField( null = True, blank = True )
     timestamp_minute = models.IntegerField( null = True, blank = True )
     timestamp_second = models.IntegerField( null = True, blank = True )
+    timestamp_ms = models.CharField( max_length = 255, null = True, blank = True )
 
     # basic information
     twitter_tweet_id = models.BigIntegerField()
@@ -215,11 +302,21 @@ class Abstract_Tweet( models.Model ):
     twitter_user = models.ForeignKey( 'Twitter_User', null = True, blank = True, related_name = 'author_user' )
     twitter_user_twitter_id = models.BigIntegerField()
     twitter_user_screenname = models.CharField( max_length = 255 )
-    user_follower_count = models.IntegerField( null = True, blank = True )
+    user_followers_count = models.IntegerField( null = True, blank = True )
     user_favorites_count = models.IntegerField( null = True, blank = True )
+    user_friends_count = models.IntegerField( null = True, blank = True )
     user_created = models.CharField( max_length = 255, blank = True, null = True )
     user_created_dt = models.DateTimeField( null = True, blank = True )
     user_location = models.TextField( null = True, blank=True )
+    user_description = models.TextField( null = True, blank=True )
+    user_statuses_count = models.IntegerField( null = True, blank = True )
+
+    # replies
+    tweet_in_reply_to_screen_name = models.CharField( max_length = 255, null = True, blank = True )
+    tweet_in_reply_to_status_id = models.BigIntegerField( null = True, blank=True )
+    tweet_in_reply_to_status_id_str = models.CharField( max_length = 255, null = True, blank = True )
+    tweet_in_reply_to_user_id = models.BigIntegerField( null = True, blank=True )
+    tweet_in_reply_to_user_id_str = models.CharField( max_length = 255, null = True, blank = True )
 
     # rewteets
     tweet_retweet_count = models.IntegerField( null = True, blank = True )
@@ -228,7 +325,8 @@ class Abstract_Tweet( models.Model ):
     tweet_retweet_id = models.BigIntegerField( null = True, blank = True )
 
     # location
-    tweet_location = models.TextField( null = True, blank = True )
+    tweet_geo = models.CharField( max_length = 255, blank = True, null = True )
+    tweet_place = models.TextField( null = True, blank = True )
     tweet_has_location = models.IntegerField( null = True, blank = True )
     tweet_coordinates = models.CharField( max_length = 255, blank = True, null = True )
     tweet_latitude = models.CharField( max_length = 255, blank = True, null = True )
@@ -236,8 +334,8 @@ class Abstract_Tweet( models.Model ):
     
     # user mentions
     tweet_user_mention_count = models.IntegerField( null = True, blank = True )
-    tweet_users_mentioned = models.TextField( null = True, blank = True )
     tweet_users_mentioned_ids = models.TextField( null = True, blank = True )
+    tweet_users_mentioned_screennames = models.TextField( null = True, blank = True )
 
     # hashtags
     tweet_hashtag_mention_count = models.IntegerField( null = True, blank = True )
@@ -246,8 +344,8 @@ class Abstract_Tweet( models.Model ):
     # URLs
     tweet_url_count = models.IntegerField( null = True, blank = True )
     tweet_shortened_urls_mentioned = models.TextField( null = True, blank = True )
+    tweet_display_urls_mentioned = models.TextField( null = True, blank = True )
     tweet_full_urls_mentioned = models.TextField( null = True, blank = True )
-
 
     #----------------------------------------------------------------------
     # meta
@@ -351,3 +449,37 @@ class Tweet( Abstract_Tweet ):
 
 
 #-- END class Tweet --#
+
+
+@python_2_unicode_compatible
+class Tweet_JSON( models.Model ):
+
+    # fields
+    tweet = models.ForeignKey( 'Tweet' )
+    tweet_json = models.TextField()
+    
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a related tweet?
+        if  ( self.tweet ):
+        
+            string_OUT += "JSON for " + str( self.twitter_tweet_id )
+            
+        #-- END check to see if tweet. --#
+ 
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Tweet_JSON --#
