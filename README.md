@@ -46,7 +46,7 @@ Also depends on Django 1.7 or greater.  Old South-based migrations are in the `/
 
             (sudo) pip install -r sourcenet/requirements.txt
 
-    - or, install each individually:
+- or, install each individually:
 
     - install ipython
 
