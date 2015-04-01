@@ -16,42 +16,6 @@ Also depends on Django 1.7 or greater.  Old South-based migrations are in the `/
 
 ## Installation
 
-### Python packages
-
-- install pip
-
-        (sudo) easy_install pip
-
-- install ipython
-
-        (sudo) pip install ipython
-
-- install six
-
-        (sudo) pip install six
-
-- install pytz
-
-        (sudo) pip install pytz
-
-- install django
-
-        (sudo) pip install django
-
-- install the twitter python library
-
-        (sudo) pip install twitter
-
-- if using postgresql, install postgresql database driver (psycopg2)
-
-        (sudo) pip install psycopg2
-        
-- if using mysql, install mysql database driver (MySQL-python)
-
-        (sudo) pip install MySQL-python
-        
-    or you can install it using your OS's package manager (sometimes easier to get it to compile).
-
 ### Django setup
 
 - in your work directory, create a django site.
@@ -70,6 +34,50 @@ Also depends on Django 1.7 or greater.  Old South-based migrations are in the `/
 
         git clone https://github.com/jonathanmorgan/tweetnet.git
     
+### Install python packages
+
+- install pip
+
+        (sudo) easy_install pip
+
+- use pip to install required packages:
+
+    - tweetnet/requirements.txt contains a list of required packages.  To install requirements using requirements.txt and pip:
+
+            (sudo) pip install -r sourcenet/requirements.txt
+
+    - or, install each individually:
+
+    - install ipython
+
+            (sudo) pip install ipython
+
+    - install six
+
+            (sudo) pip install six
+
+    - install pytz
+
+            (sudo) pip install pytz
+
+    - install django
+
+            (sudo) pip install django
+
+    - install the twitter python library
+
+            (sudo) pip install twitter
+
+    - if using postgresql, install postgresql database driver (psycopg2)
+
+            (sudo) pip install psycopg2
+        
+    - if using mysql, install mysql database driver (MySQL-python)
+
+            (sudo) pip install MySQL-python
+        
+        or you can install it using your OS's package manager (sometimes easier to get it to compile).
+
 ### Django Configuration
 
 - from the site\_directory, cd into the site configuration directory, where settings.py is located (it is named the same as site\_directory, but nested inside site\_directory, alongside all the other django code you pulled in from git - <site\_directory>/<same\_name\_as\_site\_directory>).
