@@ -46,37 +46,37 @@ Also depends on Django 1.7 or greater.  Old South-based migrations are in the `/
 
             (sudo) pip install -r sourcenet/requirements.txt
 
-- or, install each individually:
+    - or, install each individually:
 
-    - install ipython
+        - install ipython
 
-            (sudo) pip install ipython
+                (sudo) pip install ipython
 
-    - install six
+        - install six
 
-            (sudo) pip install six
+                (sudo) pip install six
 
-    - install pytz
+        - install pytz
 
-            (sudo) pip install pytz
+                (sudo) pip install pytz
 
-    - install django
+        - install django
 
-            (sudo) pip install django
+                (sudo) pip install django
 
-    - install the twitter python library
+        - install the twitter python library
 
-            (sudo) pip install twitter
+                (sudo) pip install twitter
 
-    - if using postgresql, install postgresql database driver (psycopg2)
+        - if using postgresql, install postgresql database driver (psycopg2)
 
-            (sudo) pip install psycopg2
+                (sudo) pip install psycopg2
         
-    - if using mysql, install mysql database driver (MySQL-python)
+        - if using mysql, install mysql database driver (MySQL-python)
 
-            (sudo) pip install MySQL-python
+                (sudo) pip install MySQL-python
         
-        or you can install it using your OS's package manager (sometimes easier to get it to compile).
+            or you can install it using your OS's package manager (sometimes easier to get it to compile).
 
 ### Django Configuration
 
