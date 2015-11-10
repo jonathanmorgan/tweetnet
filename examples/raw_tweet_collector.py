@@ -227,9 +227,9 @@ sql_json_insert_string = '''
 '''
 
 # set up database connection.
-db_username = "jmorgan"
-db_password = "EocaWv9)WqnmUQXiFcKMWzdeAGtVmX9UQLwA"
-db_database = "twitter"
+db_username = ""
+db_password = ""
+db_database = ""
 
 # connect inside try, in case connection fails.
 try:
@@ -241,10 +241,10 @@ try:
     db_cursor = db_connection.cursor( MySQLdb.cursors.DictCursor )
 
     # set up OAuth stuff.
-    CONSUMER_KEY = 'H14p1SdZpfDoIlbnuJ1YBeoo6'
-    CONSUMER_SECRET = 'e3qQ6EVBTTPJw1VbS09Ym4BKZp5Ylyzpm42X7yd16srOXztPa2'
-    ACCESS_TOKEN_KEY = '1159170480-TeIltZX7dA2Ukb8RcJf1s3zRjcBB7O7zC7fY2ch'
-    ACCESS_TOKEN_SECRET = '7bun8qDDpevnracV47EF9nhkNYiZ7B54RcsVloZ3wIspm'
+    CONSUMER_KEY = ''
+    CONSUMER_SECRET = ''
+    ACCESS_TOKEN_KEY = ''
+    ACCESS_TOKEN_SECRET = ''
     
     # Make an OAuth object.
     my_oauth = twitter.OAuth( ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET )
