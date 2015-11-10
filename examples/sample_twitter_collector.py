@@ -1,3 +1,7 @@
+'''
+This is old and incomplete - for a better example, see raw_tweet_collector.py
+   (though it doesn't use django ORM, writes directly to the database).
+'''
 from __future__ import unicode_literals
 
 # python imports
@@ -48,6 +52,13 @@ Sample tweet JSON - 2015-02-08
     "favorited": false,
     "filter_level": "low",
     "geo": null,
+    "coordinates": {
+      "coordinates": [
+        54.9742,
+        -1.5974
+      ],
+      "type": "Point"
+    },
     "id": 564473647612841985,
     "id_str": "564473647612841985",
     "in_reply_to_screen_name": null,

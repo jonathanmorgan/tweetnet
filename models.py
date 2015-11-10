@@ -1,5 +1,5 @@
 '''
-Copyright 2012, 2013 Jonathan Morgan
+Copyright 2012-2015 Jonathan Morgan
 
 This file is part of http://github.com/jonathanmorgan/tweetnet.
 
@@ -26,17 +26,18 @@ TWITTER_DATE_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 class Abstract_Twitter_User( models.Model ):
 
 
-    #============================================================================
+    #===========================================================================
     # Constants-ish
-    #============================================================================
+    #===========================================================================
 
 
     TWITTER_DATE_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
     
 
-    #============================================================================
+    #===========================================================================
     # Django model fields.
-    #============================================================================
+    #===========================================================================
+
 
     twitter_user_name = models.CharField( max_length = 255, blank = True, null = True ) # 'screen_name'
     twitter_user_twitter_id = models.BigIntegerField() # 'id'
@@ -45,6 +46,7 @@ class Abstract_Twitter_User( models.Model ):
     description = models.TextField( null = True, blank = True ) # 'description'
     followers_count = models.IntegerField( null = True, blank = True ) # 'followers_count'
     favourites_count = models.IntegerField( null = True, blank = True ) # 'favourites_count'
+    statuses_count = models.IntegerField( null = True, blank = True ) # 'statuses_count'
     location = models.TextField( null = True, blank=True ) # 'location'
     name = models.CharField( max_length = 255, blank = True, null = True ) # 'name'
     lang = models.CharField( max_length = 255, blank = True, null = True ) # 'lang'
@@ -108,18 +110,21 @@ class Abstract_Twitter_User( models.Model ):
       u'statuses_count': 89,
     '''
 
-    #----------------------------------------------------------------------
+
+    #===========================================================================
     # meta
-    #----------------------------------------------------------------------
+    #===========================================================================
+
 
     # meta class so we know this is an abstract class.
     class Meta:
         abstract = True
 
 
-    #----------------------------------------------------------------------
+    #===========================================================================
     # instance methods
-    #----------------------------------------------------------------------
+    #===========================================================================
+
 
     def __str__( self ):
  
@@ -142,6 +147,7 @@ class Abstract_Twitter_User( models.Model ):
         return string_OUT
 
     #-- END method __unicode__() --#
+
 
 #-- END class Abstract_Twitter_User --#
 
@@ -149,9 +155,11 @@ class Abstract_Twitter_User( models.Model ):
 @python_2_unicode_compatible
 class Twitter_User( Abstract_Twitter_User ):
 
-    #----------------------------------------------------------------------
+
+    #===========================================================================
     # instance methods
-    #----------------------------------------------------------------------
+    #===========================================================================
+
 
     def __str__( self ):
  
@@ -174,6 +182,7 @@ class Twitter_User( Abstract_Twitter_User ):
         return string_OUT
 
     #-- END method __unicode__() --#
+
 
 #-- END class Twitter_User --#
 
@@ -281,6 +290,7 @@ class Abstract_Tweet( models.Model ):
     # Django model fields.
     #============================================================================
 
+
     # timestamp
     tweet_timestamp = models.CharField( max_length = 255, null = True, blank = True )
     tweet_timestamp_dt = models.DateTimeField( null = True, blank = True )
@@ -347,18 +357,21 @@ class Abstract_Tweet( models.Model ):
     tweet_display_urls_mentioned = models.TextField( null = True, blank = True )
     tweet_full_urls_mentioned = models.TextField( null = True, blank = True )
 
-    #----------------------------------------------------------------------
+
+    #===========================================================================
     # meta
-    #----------------------------------------------------------------------
+    #===========================================================================
+
 
     # meta class so we know this is an abstract class.
     class Meta:
         abstract = True
 
 
-    #----------------------------------------------------------------------
+    #===========================================================================
     # instance methods
-    #----------------------------------------------------------------------
+    #===========================================================================
+
 
     def __str__( self ):
  
@@ -400,11 +413,17 @@ class Abstract_Tweet( models.Model ):
 
     #-- END method __str__() --#
 
+
 #-- END class Abstract_Tweet --#
 
 
 @python_2_unicode_compatible
 class Tweet( Abstract_Tweet ):
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
 
 
     def __str__( self ):
@@ -454,10 +473,21 @@ class Tweet( Abstract_Tweet ):
 @python_2_unicode_compatible
 class Tweet_JSON( models.Model ):
 
-    # fields
-    tweet = models.ForeignKey( 'Tweet' )
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    tweet = models.ForeignKey( 'Tweet', null = True, blank = True )
+    twitter_tweet_id = models.BigIntegerField( null = True, blank = True )
     tweet_json = models.TextField()
     
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
 
     def __str__( self ):
  
@@ -483,3 +513,323 @@ class Tweet_JSON( models.Model ):
 
 
 #-- END class Tweet_JSON --#
+
+
+@python_2_unicode_compatible
+class Hashtag( models.Model ):
+
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    # TextField, to make sure that we can accommodate hashtags with Unicode that
+    #    might be longer then 255 bytes.
+    hashtag_value = models.TextField()
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a related tweet?
+        if  ( self.hashtag_value ):
+        
+            string_OUT += "hashtag: " + str( self.hashtag_value )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Hashtag --#
+
+
+@python_2_unicode_compatible
+class Tweet_Hashtag( models.Model ):
+
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    tweet = models.ForeignKey( 'Tweet' )
+    hashtag = models.ForeignKey( 'Hashtag' )
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a related tweet?
+        if  ( self.tweet ):
+        
+            string_OUT += "tweet ID: " + str( self.tweet.twitter_tweet_id )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        # got a related hashtag?
+        if  ( self.hashtag ):
+        
+            string_OUT += " - hashtag: " + str( self.hashtag.hashtag_value )
+            
+        #-- END check to see if value (better be one). --#
+
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Tweet_Hashtag --#
+
+
+@python_2_unicode_compatible
+class Tweet_User_Mention( models.Model ):
+
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    tweet = models.ForeignKey( 'Tweet' )
+    mentioned_user = models.ForeignKey( 'Twitter_User' )
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a related tweet?
+        if  ( self.tweet ):
+        
+            string_OUT += "tweet ID: " + str( self.tweet.twitter_tweet_id )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        # got a related user?
+        if  ( self.mentioned_user ):
+        
+            string_OUT += " - mentions: " + str( self.mentioned_user )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Tweet_User_Mention --#
+
+
+@python_2_unicode_compatible
+class Url( models.Model ):
+
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    full_url = models.TextField()
+    shortened_url = models.TextField( null = True, blank = True )
+    display_url = models.TextField( null = True, blank = True )
+    url_after_redirects = models.TextField( null = True, blank = True ) # the URL that results after you submit the full URL and follow all redirects - is sometimes different.
+    canonical_domain = models.TextField( null = True, blank = True ) # domain part of the url after redirects.
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a URL?
+        if  ( self.full_url ):
+        
+            string_OUT += "URL: " + str( self.full_url )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Url --#
+
+
+@python_2_unicode_compatible
+class Tweet_Url( models.Model ):
+
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    tweet = models.ForeignKey( 'Tweet' )
+    url = models.ForeignKey( 'Url' )
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a related tweet?
+        if  ( self.tweet ):
+        
+            string_OUT += "tweet ID: " + str( self.tweet.twitter_tweet_id )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        # got a related URL?
+        if  ( self.url ):
+        
+            string_OUT += " - link: " + str( self.url )
+            
+        #-- END check to see if value (better be one). --#
+
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Tweet_Url --#
+
+
+@python_2_unicode_compatible
+class Tweet_Download_Raw( models.Model ):
+
+
+    #============================================================================
+    # Django model fields.
+    #============================================================================
+
+
+    tweet_timestamp = models.CharField( max_length = 255, null = True, blank = True )
+    twitter_tweet_id = models.BigIntegerField()
+    tweet_text = models.TextField( null = True, blank = True )
+    tweet_language = models.CharField( max_length = 255, null = True, blank = True )
+    tweet_retweet_count = models.IntegerField( null = True, blank = True )
+    tweet_place = models.TextField( null = True, blank = True )
+    tweet_user_mention_count = models.IntegerField( null = True, blank = True )
+    tweet_users_mentioned_screennames = models.TextField( null = True, blank = True )
+    tweet_users_mentioned_ids = models.TextField( null = True, blank = True )
+    tweet_hashtag_mention_count = models.IntegerField( null = True, blank = True )
+    tweet_hashtags_mentioned = models.TextField( null = True, blank = True )
+    tweet_url_count = models.IntegerField( null = True, blank = True )
+    tweet_shortened_urls_mentioned = models.TextField( null = True, blank = True )
+    tweet_full_urls_mentioned = models.TextField( null = True, blank = True )
+    tweet_display_urls_mentioned = models.TextField( null = True, blank = True )
+    timestamp_ms = models.CharField( max_length = 255, null = True, blank = True )
+    tweet_geo = models.CharField( max_length = 255, blank = True, null = True )
+    twitter_user_twitter_id = models.BigIntegerField()
+    twitter_user_screenname = models.CharField( max_length = 255 )
+    user_followers_count = models.IntegerField( null = True, blank = True )
+    user_favorites_count = models.IntegerField( null = True, blank = True )
+    user_friends_count = models.IntegerField( null = True, blank = True )
+    user_created = models.CharField( max_length = 255, blank = True, null = True )
+    user_location = models.TextField( null = True, blank=True )
+    user_description = models.TextField( null = True, blank=True )
+    user_statuses_count = models.IntegerField( null = True, blank = True )
+
+
+    #===========================================================================
+    # instance methods
+    #===========================================================================
+
+
+    def __str__( self ):
+ 
+        # return reference
+        string_OUT = ''
+ 
+        if ( self.id ):
+        
+            string_OUT = str( self.id ) + " - "
+            
+        #-- END check to see if ID --#
+                
+        # got a related tweet?
+        if  ( self.twitter_tweet_id ):
+        
+            string_OUT += "tweet ID: " + str( self.twitter_tweet_id )
+            
+        #-- END check to see if value (better be one). --#
+ 
+        # got a related URL?
+        if  ( self.twitter_user_screenname ):
+        
+            string_OUT += " - by: " + str( self.twitter_user_screenname )
+            
+        #-- END check to see if value (better be one). --#
+
+        return string_OUT
+
+    #-- END method __str__() --#
+
+
+#-- END class Tweet_Download_Raw --#
