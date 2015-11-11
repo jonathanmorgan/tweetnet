@@ -10,6 +10,13 @@ import json
 import sys
 import traceback
 
+# Email imports
+import smtplib
+
+# MIME types for emails
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 # import six python 2-3 compatibility package
 import six
 
@@ -99,7 +106,7 @@ current_tweet = None
 current_tweet_entities = None
 current_tweet_user = None
 tweet_place_JSON = None
-do_save_json_to_database = True
+do_save_json_to_database = False
 current_tweet_JSON_string = ""
 coordinates_dict = None
 coordinates_list = None
@@ -143,6 +150,42 @@ current_user_id = ""
 current_user_screenname = ""
 tweet_user_id_list = []
 tweet_user_screenname_list = []
+
+# variables for emailing on error.
+smtp_host = ""
+smtp_port = -1
+smtp_username = ""
+smtp_password = ""
+smtp_use_ssl = True
+email_subject = ""
+email_from = ""
+email_to = ""
+email_message = None
+email_message_body = ""
+
+#==============================================================================#
+# configuration
+#==============================================================================#
+
+# set up database connection.
+db_username = ""
+db_password = ""
+db_database = "twitter"
+
+# set up OAuth stuff.
+CONSUMER_KEY = ''
+CONSUMER_SECRET = ''
+ACCESS_TOKEN_KEY = ''
+ACCESS_TOKEN_SECRET = ''
+    
+# configure SMTP, for use when there is an exception.
+smtp_host = "smtp.gmail.com"
+smtp_port = 465
+smtp_username = ""
+smtp_password = ""
+smtp_use_ssl = True
+email_from = ""
+email_to = ""
 
 #==============================================================================#
 # program logic
@@ -226,11 +269,6 @@ sql_json_insert_string = '''
     )
 '''
 
-# set up database connection.
-db_username = ""
-db_password = ""
-db_database = ""
-
 # connect inside try, in case connection fails.
 try:
 
@@ -240,12 +278,6 @@ try:
     # create mysql cursor that maps column names to values in the query result.
     db_cursor = db_connection.cursor( MySQLdb.cursors.DictCursor )
 
-    # set up OAuth stuff.
-    CONSUMER_KEY = ''
-    CONSUMER_SECRET = ''
-    ACCESS_TOKEN_KEY = ''
-    ACCESS_TOKEN_SECRET = ''
-    
     # Make an OAuth object.
     my_oauth = twitter.OAuth( ACCESS_TOKEN_KEY, ACCESS_TOKEN_SECRET, CONSUMER_KEY, CONSUMER_SECRET )
     
@@ -319,131 +351,134 @@ try:
             
             # entities
             current_tweet_entities = current_tweet.get( 'entities' )
+            if ( current_tweet_entities is not None ):
                 
-            # do we have user mentions in this tweet?
-            tweet_user_mentions_json_list = current_tweet_entities.get( 'user_mentions' )
-            user_mention_count = len( tweet_user_mentions_json_list )
-            if user_mention_count > 0:
-            
-                # got at least one user mention. loop and build lists.
-                tweet_user_id_list = []
-                tweet_user_screenname_list = []
-                for tweet_user_mention_json in tweet_user_mentions_json_list:
+                # do we have user mentions in this tweet?
+                tweet_user_mentions_json_list = current_tweet_entities.get( 'user_mentions' )
+                user_mention_count = len( tweet_user_mentions_json_list )
+                if user_mention_count > 0:
                 
-                    # get user mention values
-                    current_user_id = get_dict_value( tweet_user_mention_json, 'id_str', "", "" )
-                    current_user_screenname = get_dict_value( tweet_user_mention_json, 'screen_name', "", "" )
+                    # got at least one user mention. loop and build lists.
+                    tweet_user_id_list = []
+                    tweet_user_screenname_list = []
+                    for tweet_user_mention_json in tweet_user_mentions_json_list:
                     
-                    # append to lists
-                    tweet_user_id_list.append( current_user_id )
-                    tweet_user_screenname_list.append( current_user_screenname )
-                
-                #-- END loop over hash tags --#
-            
-                # store count
-                tweet_user_mention_count = len( tweet_user_id_list )
-    
-                # convert to comma-delimited lists for storage.
-                tweet_users_mentioned_ids = ",".join( tweet_user_id_list )
-                tweet_users_mentioned_screennames = ",".join( tweet_user_screenname_list )
-    
-            else:
-                
-                # no user mentions - set count to 0, everything else to "".
-                tweet_user_mention_count = 0
-                tweet_users_mentioned_ids = ""
-                tweet_users_mentioned_screennames = ""
-                
-            #-- END check to see if one or more user mentions --#
-            
-            # !tweet hashtags?
-            
-            # initialize hashtag variables
-            tweet_hashtag_mention_count = 0
-            tweet_hashtags_mentioned = ""
-            
-            # see if we have any hash tags
-            tweet_hashtag_json_list = current_tweet_entities.get( 'hashtags' )
-            hashtag_count = len( tweet_hashtag_json_list )
-            if hashtag_count > 0:
-            
-                # got at least one hashtag. loop and build list.
-                tweet_hashtag_list = []
-                for tweet_hashtag_json in tweet_hashtag_json_list:
-                
-                    # get hash tag value
-                    current_hashtag_text = get_dict_value( tweet_hashtag_json, 'text', "", "" )
+                        # get user mention values
+                        current_user_id = get_dict_value( tweet_user_mention_json, 'id_str', "", "" )
+                        current_user_screenname = get_dict_value( tweet_user_mention_json, 'screen_name', "", "" )
+                        
+                        # append to lists
+                        tweet_user_id_list.append( current_user_id )
+                        tweet_user_screenname_list.append( current_user_screenname )
                     
-                    # append to list
-                    tweet_hashtag_list.append( current_hashtag_text )
+                    #-- END loop over hash tags --#
                 
-                #-- END loop over hash tags --#
-            
-                # store count
-                tweet_hashtag_mention_count = len( tweet_hashtag_list )
-    
-                # convert to comma-delimited list for storage.
-                tweet_hashtags_mentioned = ",".join( tweet_hashtag_list )
-    
-            else:
+                    # store count
+                    tweet_user_mention_count = len( tweet_user_id_list )
+        
+                    # convert to comma-delimited lists for storage.
+                    tweet_users_mentioned_ids = ",".join( tweet_user_id_list )
+                    tweet_users_mentioned_screennames = ",".join( tweet_user_screenname_list )
+        
+                else:
+                    
+                    # no user mentions - set count to 0, everything else to "".
+                    tweet_user_mention_count = 0
+                    tweet_users_mentioned_ids = ""
+                    tweet_users_mentioned_screennames = ""
+                    
+                #-- END check to see if one or more user mentions --#
                 
-                # set all variables to 0, empty string.
+                # !tweet hashtags?
+                
+                # initialize hashtag variables
                 tweet_hashtag_mention_count = 0
                 tweet_hashtags_mentioned = ""
                 
-            #-- END check to see if one or more hash tags --#
-            
-            # !tweet urls?
-            
-            # initialize URL variables.
-            tweet_url_count = 0
-            tweet_shortened_urls_mentioned = ""
-            tweet_display_urls_mentioned = ""
-            tweet_full_urls_mentioned = ""
-    
-            # do we have URLs in tweet?
-            tweet_url_json_list = current_tweet_entities.get( 'urls' )
-            url_count = len( tweet_url_json_list )
-            if url_count > 0:
-            
-                # got at least one url. loop and build lists.
-                tweet_url_list = []
-                tweet_display_url_list = []
-                tweet_short_url_list = []
-                for tweet_url_json in tweet_url_json_list:
+                # see if we have any hash tags
+                tweet_hashtag_json_list = current_tweet_entities.get( 'hashtags' )
+                hashtag_count = len( tweet_hashtag_json_list )
+                if hashtag_count > 0:
                 
-                    # get URL, display URL, and short URL
-                    current_url_text = get_dict_value( tweet_url_json, 'expanded_url', "", "" )
-                    current_display_url_text = get_dict_value( tweet_url_json, 'display_url', "", "" )
-                    current_short_url_text = get_dict_value( tweet_url_json, 'url', "", "" )
-    
-                    # append to lists
-                    encoded_value = current_url_text.encode( 'utf-8' )
-                    tweet_url_list.append( six.moves.urllib.parse.quote_plus( encoded_value ) )
-                    encoded_value = current_display_url_text.encode( 'utf-8' )
-                    tweet_display_url_list.append( six.moves.urllib.parse.quote_plus( encoded_value ) )
-                    encoded_value = current_short_url_text.encode( 'utf-8' )
-                    tweet_short_url_list.append( six.moves.urllib.parse.quote_plus( encoded_value ) )
+                    # got at least one hashtag. loop and build list.
+                    tweet_hashtag_list = []
+                    for tweet_hashtag_json in tweet_hashtag_json_list:
+                    
+                        # get hash tag value
+                        current_hashtag_text = get_dict_value( tweet_hashtag_json, 'text', "", "" )
+                        
+                        # append to list
+                        tweet_hashtag_list.append( current_hashtag_text )
+                    
+                    #-- END loop over hash tags --#
                 
-                #-- END loop over URLs --#
-            
-                # store count
-                tweet_url_count = len( tweet_url_list )
-    
-                # convert to comma-delimited lists for storage.
-                tweet_shortened_urls_mentioned = ",".join( tweet_short_url_list )
-                tweet_display_urls_mentioned = ",".join( tweet_display_url_list )
-                tweet_full_urls_mentioned = ",".join( tweet_url_list )
-    
-            else:
+                    # store count
+                    tweet_hashtag_mention_count = len( tweet_hashtag_list )
+        
+                    # convert to comma-delimited list for storage.
+                    tweet_hashtags_mentioned = ",".join( tweet_hashtag_list )
+        
+                else:
+                    
+                    # set all variables to 0, empty string.
+                    tweet_hashtag_mention_count = 0
+                    tweet_hashtags_mentioned = ""
+                    
+                #-- END check to see if one or more hash tags --#
                 
-                # set count to 0, everything else to "".
+                # !tweet urls?
+                
+                # initialize URL variables.
                 tweet_url_count = 0
                 tweet_shortened_urls_mentioned = ""
                 tweet_display_urls_mentioned = ""
                 tweet_full_urls_mentioned = ""
+        
+                # do we have URLs in tweet?
+                tweet_url_json_list = current_tweet_entities.get( 'urls' )
+                url_count = len( tweet_url_json_list )
+                if url_count > 0:
                 
-            #-- END check to see if one or more urls --#
+                    # got at least one url. loop and build lists.
+                    tweet_url_list = []
+                    tweet_display_url_list = []
+                    tweet_short_url_list = []
+                    for tweet_url_json in tweet_url_json_list:
+                    
+                        # get URL, display URL, and short URL
+                        current_url_text = get_dict_value( tweet_url_json, 'expanded_url', "", "" )
+                        current_display_url_text = get_dict_value( tweet_url_json, 'display_url', "", "" )
+                        current_short_url_text = get_dict_value( tweet_url_json, 'url', "", "" )
+        
+                        # append to lists
+                        encoded_value = current_url_text.encode( 'utf-8' )
+                        tweet_url_list.append( six.moves.urllib.parse.quote_plus( encoded_value ) )
+                        encoded_value = current_display_url_text.encode( 'utf-8' )
+                        tweet_display_url_list.append( six.moves.urllib.parse.quote_plus( encoded_value ) )
+                        encoded_value = current_short_url_text.encode( 'utf-8' )
+                        tweet_short_url_list.append( six.moves.urllib.parse.quote_plus( encoded_value ) )
+                    
+                    #-- END loop over URLs --#
+                
+                    # store count
+                    tweet_url_count = len( tweet_url_list )
+        
+                    # convert to comma-delimited lists for storage.
+                    tweet_shortened_urls_mentioned = ",".join( tweet_short_url_list )
+                    tweet_display_urls_mentioned = ",".join( tweet_display_url_list )
+                    tweet_full_urls_mentioned = ",".join( tweet_url_list )
+        
+                else:
+                    
+                    # set count to 0, everything else to "".
+                    tweet_url_count = 0
+                    tweet_shortened_urls_mentioned = ""
+                    tweet_display_urls_mentioned = ""
+                    tweet_full_urls_mentioned = ""
+                    
+                #-- END check to see if one or more urls --#
+                
+            #-- END check to see if entities present. --#
             
             timestamp_ms = get_dict_value( current_tweet, "timestamp_ms", "", "" )
             
@@ -595,11 +630,47 @@ except Exception as e:
 
     # get exception details
     exception_type, exception_value, exception_traceback = sys.exc_info()
-    print( "Exception caught: " )
-    print( "- args = " + str( e.args ) )
-    print( "- type = " + str( exception_type ) )
-    print( "- value = " + str( exception_value ) )
-    print( "- traceback = " + str( traceback.format_exc() ) )
+    
+    # Create exception message.
+    email_message_body = "Exception caught: "
+    email_message_body += "\n- args = " + str( e.args )
+    email_message_body += "\n- type = " + str( exception_type )
+    email_message_body += "\n- value = " + str( exception_value )
+    email_message_body += "\n- traceback = " + str( traceback.format_exc() )
+
+    # email exception message
+    email_message = MIMEText( email_message_body )
+    email_message[ 'Subject' ] = 'UMD - Error in Twitter Collector'
+    email_message[ 'From' ] = email_from
+    email_message[ 'To' ] = email_to
+    
+    # use SSL?
+    if ( smtp_use_ssl == True ):
+
+        # use SSL
+        my_smtp_server = smtplib.SMTP_SSL( smtp_host, smtp_port )
+        
+    else:
+    
+        # don't use SSL
+        my_smtp_server = smtplib.SMTP( smtp_host, smtp_port )
+        
+    #-- END check to see if use SSL --#
+    
+    # got username (allow empty password)?
+    if ( ( smtp_username ) and ( smtp_username != None ) and ( smtp_username != "" ) ):
+    
+        # yes.  Login.
+        my_smtp_server.login( smtp_username, smtp_password )
+        
+    #-- END check to see if we have username. --#
+
+    # send email
+    my_smtp_server.sendmail( email_from, email_to, email_message.as_string() )
+    my_smtp_server.quit()
+
+    # output message
+    print( email_message_body )
     
 finally:
 
