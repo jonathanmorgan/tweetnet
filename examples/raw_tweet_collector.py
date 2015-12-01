@@ -260,7 +260,7 @@ smtp_port = 465
 smtp_username = ""
 smtp_password = ""
 smtp_use_ssl = True
-email_from = ""
+email_from = "" # can be different from SMTP user
 email_to = ""
 
 #==============================================================================#
